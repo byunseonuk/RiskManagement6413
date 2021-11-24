@@ -1,0 +1,40 @@
+{
+  "xsappname": "RiskManagement6413",
+  "tenant-mode": "dedicated",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.RiskViewer6413",
+      "description": "RiskViewer6413"
+    },
+    {
+      "name": "$XSAPPNAME.RiskManager6413",
+      "description": "RiskManager6413"
+    }
+  ],  
+  "attributes": [], 
+  "role-templates": [
+    {
+      "name": "RiskViewer6413",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.RiskViewer6413"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "RiskManager6413",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.RiskManager6413"
+      ],
+      "attribute-references": []
+    },
+    {
+        "name": "Token_Exchange",
+        "description": "UAA",
+        "scope-references": [
+            "uaa.user"
+        ]
+    }
+  ]
+}

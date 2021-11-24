@@ -1,0 +1,110 @@
+## Generated mta.yaml based on template version 0.4.0
+## appName = RiskManagement6413
+## language=nodejs; multitenant=false
+## approuter=
+_schema-version: '3.1'
+ID: RiskManagement6413
+version: 1.0.0
+description: "A simple CAP project."
+parameters:
+  enable-parallel-deployments: true
+   
+build-parameters:
+  before-all:
+   - builder: custom
+     commands:
+      - npm install --production
+      - npx -p @sap/cds-dk cds build --production
+
+modules:
+ # --------------------- SERVER MODULE ------------------------
+ - name: RiskManagement6413-srv
+ # ------------------------------------------------------------
+   type: nodejs
+   path: gen/srv
+   parameters:
+     buildpack: nodejs_buildpack
+   requires:
+    # Resources extracted from CAP configuration
+    - name: RiskManagement6413-db
+    - name: RiskManagement6413-uaa
+   provides:
+    - name: srv-api      # required by consumers of CAP services (e.g. approuter)
+      properties:
+        srv-url: ${default-url}
+
+ # -------------------- SIDECAR MODULE ------------------------
+ - name: RiskManagement6413-db-deployer
+ # ------------------------------------------------------------
+   type: hdb
+   path: gen/db  
+   parameters:
+     buildpack: nodejs_buildpack
+   requires:
+    # 'hana' and 'xsuaa' resources extracted from CAP configuration
+    - name: RiskManagement6413-db
+    - name: RiskManagement6413-uaa
+
+  # --------------------  APPROUTER -----------------------------
+  # 애플리케이션간 토큰 포워딩, 라우팅.
+ - name: RiskManagement6413-approuter  
+  # ------------------------------------------------------------
+   type: nodejs
+   path: approuter
+   requires:
+     - name: RiskManagement6413-uaa
+     - name: srv-api
+       group: destinations
+       properties:
+         forwardAuthToken: true
+         strictSSL: true
+         name: srv-binding
+         url: '~{srv-url}'
+   build-parameters:
+     requires:
+       - name: RiskManagement6413-app
+         artifacts:
+           - ./*
+         target-path: resources
+  # --------------------  UI -----------------------------------
+ - name: RiskManagement6413-app
+  # ------------------------------------------------------------
+   type: html5
+   path: app
+   build-parameters:
+     supported-platforms: []
+
+resources:
+ # services extracted from CAP configuration
+ # 'service-plan' can be configured via 'cds.requires.<name>.vcap.plan'
+# ------------------------------------------------------------
+ - name: RiskManagement6413-db
+# ------------------------------------------------------------
+   type: com.sap.xs.hdi-container
+   parameters:
+     service: hana  # or 'hanatrial' on trial landscapes
+     service-plan: hdi-shared
+   properties:
+     hdi-service-name: ${service-name}
+# ------------------------------------------------------------
+ - name: RiskManagement6413-uaa
+# ------------------------------------------------------------
+   type: org.cloudfoundry.managed-service
+   parameters:
+     service: xsuaa
+     service-plan: application  
+     path: ./xs-security.json
+
+     config:
+       xsappname: RiskManagement6413-${space}    #  name + space dependency
+       role-collections:
+         - name: 'RiskManager6413-${space}'
+           description: Manage Risks
+           role-template-references:
+             - $XSAPPNAME.RiskManager6413
+         - name: 'RiskViewer6413-${space}'
+           description: View Risks
+           role-template-references:
+             - $XSAPPNAME.RiskViewer6413
+
+
