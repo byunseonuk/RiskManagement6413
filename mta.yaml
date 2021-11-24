@@ -6,7 +6,7 @@ _schema-version: '3.1'
 ID: RiskManagement6413
 version: 1.0.0
 description: "A simple CAP project."
-parameters:
+parameters: 
   enable-parallel-deployments: true
    
 build-parameters:
