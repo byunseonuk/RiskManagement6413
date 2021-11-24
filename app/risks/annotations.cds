@@ -1,1 +1,1 @@
-using RiskService as service from 'RiskManagement6413../../../home/user/projects/RiskManagement6413/srv/risk-service';
+using RiskService as service from '../../srv/risk-service';
